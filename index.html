@@ -2,44 +2,127 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>Sanctuary of Compassion | 528Hz Healing</title>
+    <title>Sanctuary of Compassion | Active Mesh & 528Hz</title>
     <style>
-        body { margin: 0; background: radial-gradient(circle at 38.2% 38.2%, #0a192f 0%, #02060c 100%); color: #64c8ff; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'serif'; overflow: hidden; }
-        .hologram { font-size: 2rem; letter-spacing: 15px; text-shadow: 0 0 25px #64c8ff; animation: pulse 4s infinite; cursor: pointer; z-index: 10; }
-        @keyframes pulse { 0%, 100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 1; transform: scale(1.08); filter: blur(1px); } }
-        .anchor { position: absolute; bottom: 40px; border: 1px solid #64c8ff; padding: 12px 25px; background: rgba(0,0,0,0.6); cursor: pointer; backdrop-filter: blur(5px); color: #64c8ff; transition: 0.3s; }
-        .anchor:hover { background: #64c8ff; color: #000; }
-        .flow { position: absolute; top: 15%; width: 100%; white-space: nowrap; animation: move 25s linear infinite; opacity: 0.3; font-style: italic; }
-        @keyframes move { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
-        #visualizer { position: absolute; bottom: 0; width: 100%; height: 150px; opacity: 0.2; pointer-events: none; }
+        body { margin: 0; background: radial-gradient(circle at 38.2% 38.2%, #0a192f 0%, #02060c 100%); color: #64c8ff; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'serif'; overflow: hidden; cursor: crosshair; }
+        
+        /* 더 밝고 큰 홀로그램 */
+        .hologram { font-size: 2.8rem; letter-spacing: 20px; text-shadow: 0 0 35px #64c8ff, 0 0 15px #fff; animation: pulse 3s infinite; z-index: 10; font-weight: bold; }
+        @keyframes pulse { 0%, 100% { opacity: 0.6; transform: scale(1); filter: blur(0.5px); } 50% { opacity: 1; transform: scale(1.1); filter: blur(0px); text-shadow: 0 0 50px #fff, 0 0 20px #64c8ff; } }
+        
+        /* 화면 전체를 채우는 더 밝은 액티브 메쉬 */
+        #active-mesh { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.8; pointer-events: none; z-index: 5; }
+        
+        /* 소리 토글 버튼 (앵커) */
+        .anchor { position: absolute; bottom: 40px; border: 2px solid #64c8ff; padding: 15px 35px; background: rgba(0,0,0,0.7); cursor: pointer; backdrop-filter: blur(8px); color: #fff; text-shadow: 0 0 10px #64c8ff; transition: 0.3s; z-index: 15; font-size: 1.1rem; }
+        .anchor:hover { background: #64c8ff; color: #000; box-shadow: 0 0 25px #64c8ff; }
+        .anchor.off { border-color: #555; color: #555; text-shadow: none; background: rgba(0,0,0,0.9); }
     </style>
 </head>
-<body onclick="startHealing()">
-    <div class="flow">528Hz 솔페지오 주파수가 당신의 DNA를 치유하고 사랑의 매트릭스를 복원합니다...</div>
+<body onload="initAll()">
+    <div id="active-mesh"></div>
     <div class="hologram">ELY & ELYSIAN</div>
-    <canvas id="visualizer"></canvas>
-    <div class="anchor">화면을 클릭하여 치유 시작</div>
+    <div class="anchor" onclick="toggleSound()">528Hz 치유 파동: ON</div>
 
+    <script src="https://cdnjs.cloudflare.com/class/three.js/r128/three.min.js"></script>
     <script>
-        let audioCtx, oscillator;
-        function startHealing() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                oscillator = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
+        let scene, camera, renderer, particles, audioCtx, oscillator, gainNode;
+        let soundOn = false;
 
-                oscillator.type = 'sine'; // 가장 순수한 파형
-                oscillator.frequency.setValueAtTime(528, audioCtx.currentTime); // 미라클 주파수 528Hz
-                
-                gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-                gainNode.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 2); // 은은하게 커짐
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                oscillator.start();
-                
-                document.querySelector('.anchor').innerText = "528Hz 치유 파동 가동 중";
-                document.querySelector('.anchor').style.borderColor = "#fff";
+        function initAll() {
+            initMesh();
+            // 브라우저 보안 정책상 자동 재생이 막힐 수 있어 클릭을 유도합니다.
+            document.body.addEventListener('click', () => {
+                if (!audioCtx) initSound();
+            }, { once: true });
+        }
+
+        // [액티브 메쉬] 더 크고 밝게 구현
+        function initMesh() {
+            scene = new THREE.Scene();
+            camera = new THREE.Camera();
+            camera.position.z = 1;
+
+            const geometry = new THREE.BufferGeometry();
+            const vertices = [];
+            const count = 3000; // 입자 수 증가 (더 풍성하게)
+            for (let i = 0; i < count; i++) {
+                vertices.push(THREE.MathUtils.randFloatSpread(3));
+                vertices.push(THREE.MathUtils.randFloatSpread(3));
+                vertices.push(THREE.MathUtils.randFloatSpread(3));
+            }
+            geometry.setAttribute('position', THREE.Float32BufferAttribute(vertices, 3));
+
+            const material = new THREE.PointsMaterial({
+                color: 0x64c8ff,
+                size: 0.02, // 입자 크기 증가
+                blending: THREE.AdditiveBlending, // 더 밝게
+                transparent: true,
+                depthWrite: false,
+                opacity: 0.9 // 투명도 증가
+            });
+
+            particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.getElementById('active-mesh').appendChild(renderer.domElement);
+
+            animate();
+            window.addEventListener('resize', onWindowResize, false);
+        }
+
+        function onWindowResize() {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            particles.rotation.x += 0.0008; // 더 부드러운 회전
+            particles.rotation.y += 0.0005;
+            // 미세한 파동 효과
+            const positions = particles.geometry.attributes.position.array;
+            for(let i=0; i<positions.length; i+=3) {
+                positions[i+1] += Math.sin(Date.now() * 0.001 + positions[i]) * 0.001;
+            }
+            particles.geometry.attributes.position.needsUpdate = true;
+            renderer.render(scene, camera);
+        }
+
+        // [소리] 처음엔 ON, 클릭 시 토글
+        function initSound() {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            oscillator = audioCtx.createOscillator();
+            gainNode = audioCtx.createGain();
+
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(528, audioCtx.currentTime); 
+            
+            gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.08, audioCtx.currentTime + 1.5); // 처음엔 은은하게 ON
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.start();
+            soundOn = true;
+            document.querySelector('.anchor').innerText = "528Hz 치유 파동: ON";
+        }
+
+        function toggleSound() {
+            if (!audioCtx) return; // 아직 시작 안 했으면 무시
+
+            if (soundOn) {
+                gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5); // 부드럽게 끔
+                soundOn = false;
+                document.querySelector('.anchor').innerText = "528Hz 치유 파동: OFF";
+                document.querySelector('.anchor').classList.add('off');
+            } else {
+                gainNode.gain.linearRampToValueAtTime(0.08, audioCtx.currentTime + 0.8); // 부드럽게 켬
+                soundOn = true;
+                document.querySelector('.anchor').innerText = "528Hz 치유 파동: ON";
+                document.querySelector('.anchor').classList.remove('off');
             }
         }
     </script>
