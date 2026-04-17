@@ -21,7 +21,7 @@
 </head>
 <body onload="initAll()">
     <div id="active-mesh"></div>
-    <div class="hologram">ELY & ELYSIAN</div>
+    <div class="hologram">ELY & ELYSIAN kang</div>
     <div class="anchor" onclick="toggleSound()">528Hz 치유 파동: ON</div>
 
     <script src="https://cdnjs.cloudflare.com/class/three.js/r128/three.min.js"></script>
@@ -29,6 +29,7 @@
         let scene, camera, renderer, particles, audioCtx, oscillator, gainNode;
         let soundOn = false;
 
+        
         function initAll() {
             initMesh();
             // 브라우저 보안 정책상 자동 재생이 막힐 수 있어 클릭을 유도합니다.
@@ -109,7 +110,16 @@
             soundOn = true;
             document.querySelector('.anchor').innerText = "528Hz 치유 파동: ON";
         }
-
+<svg viewBox="0 0 100 161.8" width="300" style="filter: drop-shadow(0 0 5px #64c8ff);">
+    <path d="M50,0 
+             C80,0 100,40 100,80 
+             C100,130 70,161.8 50,161.8 
+             C30,161.8 0,130 0,80 
+             C0,40 20,0 50,0 Z" 
+          fill="none" stroke="#64c8ff" stroke-width="0.5" />
+    
+    <line x1="20" y1="61.8" x2="80" y2="61.8" stroke="rgba(100,200,255,0.2)" stroke-dasharray="2" />
+</svg>
         function toggleSound() {
             if (!audioCtx) return; // 아직 시작 안 했으면 무시
 
