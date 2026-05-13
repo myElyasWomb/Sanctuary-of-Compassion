@@ -2,7 +2,8 @@
 
 이 메시지는 현재 지구에 '정화의 빛'이 강해지고 있으며, 오랫동안 닫혀 있던 폭로와 공개(Disclosure)의 문이 층층이 열리고 있다고 말합니다.
 
-​
+​![플레이디안메시](<img width="692" height="386" alt="img00001" src="https://github.com/user-attachments/assets/d4c68f84-fd48-453e-b2e0-38f68d6fe413" />)
+
 
 1. 내면의 리듬으로 귀환 (Returning to Inner Cadence)
 
